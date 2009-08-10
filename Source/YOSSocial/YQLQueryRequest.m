@@ -15,6 +15,7 @@ static NSString *const kYQLBaseUrl = @"http://query.yahooapis.com";
 @implementation YQLQueryRequest
 
 @synthesize environmentFile;
+@synthesize diagnostics;
 
 #pragma mark init
 
@@ -39,8 +40,6 @@ static NSString *const kYQLBaseUrl = @"http://query.yahooapis.com";
 	[client setHTTPMethod:@"GET"];
 	[client setOauthParamsLocation:@"OAUTH_PARAMS_IN_QUERY_STRING"];
 	[client sendAsyncRequestWithDelegate:delegate];
-	
-	[client release];
 }
 
 
@@ -52,8 +51,6 @@ static NSString *const kYQLBaseUrl = @"http://query.yahooapis.com";
 	[client setOauthParamsLocation:@"OAUTH_PARAMS_IN_QUERY_STRING"];
 	
 	YOSResponseData *response = [client sendSynchronousRequest];
-
-	[client release];
 	
 	if(!response.didSucceed) {
 		return nil;
@@ -70,8 +67,6 @@ static NSString *const kYQLBaseUrl = @"http://query.yahooapis.com";
 	[client setOauthParamsLocation:@"OAUTH_PARAMS_IN_QUERY_STRING"];
 	
 	YOSResponseData *response = [client sendSynchronousRequest];
-	
-	[client release];
 	
 	if (!response.didSucceed) {
 		return NO;
@@ -94,9 +89,12 @@ static NSString *const kYQLBaseUrl = @"http://query.yahooapis.com";
 	
 	NSURL *url = [NSURL URLWithString:requestUrl];
 	
-	NSMutableDictionary *requestParameters = [[NSMutableDictionary alloc] init];
+	NSString *useDiagnostics = (self.diagnostics) ? @"true" : @"false";
+	
+	NSMutableDictionary *requestParameters = [NSMutableDictionary dictionary];
 	[requestParameters setObject:aQuery forKey:@"q"];
 	[requestParameters setObject:self.format forKey:@"format"];
+	[requestParameters setObject:useDiagnostics forKey:@"diagnostics"];
 	
 	if(self.environmentFile != nil) 
 		[requestParameters setObject:self.environmentFile forKey:@"env"];
@@ -107,7 +105,7 @@ static NSString *const kYQLBaseUrl = @"http://query.yahooapis.com";
 	[client setRequestUrl:url];
 	[client setRequestParameters:requestParameters];
 	
-	return client;
+	return [client autorelease];
 }
 
 @end
